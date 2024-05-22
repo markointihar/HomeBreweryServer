@@ -3,11 +3,24 @@
 const db = require('../config/db');
 
 exports.getAllData = (req, res) => {
-  const sql = 'select * from izdelek';
-  db.query(sql, (err, results) => {
+  const sqlIzdelki = 'SELECT * FROM izdelek';
+  const sqlKategorije = 'SELECT * FROM kategorija';
+  
+  db.query(sqlIzdelki, (err, resultsIzdelki) => {
     if (err) {
       return res.status(500).send(err);
     }
-    res.json(results);
+
+    db.query(sqlKategorije, (err, resultsKategorije) => {
+      if (err) {
+        return res.status(500).send(err);
+      }
+
+      res.json({
+        izdelki: resultsIzdelki,
+        kategorije: resultsKategorije
+      });
+    });
   });
 };
+
