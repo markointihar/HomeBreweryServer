@@ -4,18 +4,18 @@ const nodemailer = require('nodemailer');
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'aaaa@gmail.com', // Uporabniško ime e-poštnega računa
-        pass: '12345678' // Geslo za e-poštni račun
+        user: 'intihar.marko123@gmail.com', // Uporabniško ime e-poštnega računa
+        pass: 'paat gvhj mczw bnqq' // Geslo za e-poštni račun
     }
 });
 
 // Funkcija za pošiljanje e-pošte
 const sendEmail = async (link) => {
     const mailOptions = {
-        from: 'iaaaaa3@gmail.com', // E-poštni naslov pošiljatelja
-        to: "ieeeeo@protonmail.com", // E-poštni naslov prejemnika
+        from: 'intihar.marko123@gmail.com', // E-poštni naslov pošiljatelja
+        to: "intihar.marko@protonmail.com", // E-poštni naslov prejemnika
         subject: "Pomoč", // Naslov e-poštnega sporočila
-        html: `idi pomagat na ${link}`  // Vsebina e-poštnega sporočila
+        html: `<h1>Uporabnik rabi pomoč</h1><p>idi mu pomagat na </p>  <a>${link}</a>`  // Vsebina e-poštnega sporočila
     };
 
     try {
