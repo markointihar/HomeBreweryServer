@@ -2,8 +2,11 @@
 
 const express = require('express');
 const router = express.Router();
-const dataController = require('../controllers/izdelekControler');
+const izdelekController = require('../controllers/izdelekControler');
 
-router.get('/izdelki', dataController.getAllData);
+// export v izdelekControler.js omogoči da s lahko tu uporabljajo .getData/addIzdelek
+router.get('/izdelki', izdelekController.getAllData);
+router.get('/dodajIzdelek', izdelekController.getKategorije )
+router.post('/izdelki', izdelekController.addIzdelek);
 
 module.exports = router;
