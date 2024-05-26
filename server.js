@@ -20,6 +20,7 @@ const io = new Server(server, {
 
 
 app.use(cors());  // Omogočanje CORS za vse zahteve
+app.use(express.json()); // Za parsiranje JSON telesa zahtevkov
 app.use('/api', dataRoutes);
 app.use('/', googleRoutes);
 
