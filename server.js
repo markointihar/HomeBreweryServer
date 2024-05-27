@@ -5,7 +5,8 @@ const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');  // Uvoz uuid knjižnice
 const sendEmail = require('./services/emailService');
 const connection = require('./config/db');
-const dataRoutes = require('./routes/izdelekRoute'); // pridobijo se exporti z routes
+const izdelekRoutes = require('./routes/izdelekRoute'); // pridobijo se exporti z routes
+const cartRoutes = require('./routes/cartRoute')
 
 
 const app = express();
@@ -21,7 +22,8 @@ const io = new Server(server, {
 
 app.use(cors());  // Omogočanje CORS za vse zahteve
 app.use(express.json()); // Za parsiranje JSON telesa zahtevkov
-app.use('/api', dataRoutes);
+app.use('/api', cartRoutes)
+app.use('/api', izdelekRoutes);
 
 app.get('/', (req, res) => {
     res.send('Server is running');

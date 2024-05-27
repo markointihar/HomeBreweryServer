@@ -8,7 +8,7 @@ const db = require('../config/db');
 exports.getAllData = (req, res) => {
   
   //definicija querij-ev za pridobivaneje izdelkov in kategorij
-  const sqlIzdelki = 'SELECT * FROM izdelek';
+  const sqlIzdelki = 'SELECT izdelek.id, izdelek.naziv, izdelek.cena, izdelek.opis, kategorija.ime as ime_kategorije, kategorija.id as kategorija_id FROM izdelek JOIN kategorija ON izdelek.kategorija_id = kategorija.id;';
   const sqlKategorije = 'SELECT * FROM kategorija';
   
   //izvanaje querijev in prvo pridobivanje izdelkov 
@@ -31,6 +31,24 @@ exports.getAllData = (req, res) => {
     });
   });
 };
+
+exports.getIzdelekById = (req, res) => {
+  const id = req.params.id;
+  const sql = `SELECT * FROM izdelek WHERE izdelek.id = ${id  }`;
+
+  db.query(sql, [id], (err, result) => {
+    if (err) {
+      return res.status(500).send(err);
+    }
+
+    if (result.length === 0) {
+      return res.status(404).send('Izdelek ne obstaja');
+    }
+
+    res.json(result[0]);
+  });
+};
+
 
 
 exports.getKategorije = (req ,res)=>{
