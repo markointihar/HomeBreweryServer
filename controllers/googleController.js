@@ -3,6 +3,8 @@ const dotenv = require('dotenv');
 dotenv.config();
 const dayjs = require('dayjs');
 
+const connection = require('../config/db');
+
 const outh2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
@@ -12,6 +14,8 @@ const calendar = google.calendar({ version: 'v3', auth: outh2Client });
 
 const scopes = [
     'https://www.googleapis.com/auth/calendar',
+    'https://www.googleapis.com/auth/userinfo.profile', 
+    'https://www.googleapis.com/auth/userinfo.email'
 ];
 
 exports.loginGoogle = (req, res) => {
@@ -23,11 +27,59 @@ exports.loginGoogle = (req, res) => {
 }
 
 exports.redirectGoogle = async (req, res) => {
+    try {
+        const { tokens } = await outh2Client.getToken(req.query.code);
+        outh2Client.setCredentials(tokens);
 
-    const { tokens } = await outh2Client.getToken(req.query.code);
-    outh2Client.setCredentials(tokens);
+        console.log('Tokens:', tokens);
 
-    res.redirect(`http://localhost:5173/login-success?token=${tokens.access_token}`);
+        const ticket = await outh2Client.verifyIdToken({
+            idToken: tokens.id_token,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+
+        const payload = ticket.getPayload();
+        const userId = payload['sub'];
+        const email = payload['email'];
+        const name = payload['name'];
+
+        // Preverite, ali uporabnik že obstaja v bazi
+        connection.query('SELECT * FROM users WHERE google_id = ?', [userId], (error, results) => {
+            if (error) {
+                console.error('Error querying MySQL:', error);
+                res.status(500).send('Database query error');
+                return;
+            }
+
+            if (results.length === 0) {
+                // Uporabnik ne obstaja, vstavi novega uporabnika
+                connection.query('INSERT INTO users (google_id, email, name) VALUES (?, ?, ?)', [userId, email, name], (error, results) => {
+                    if (error) {
+                        console.error('Error inserting into MySQL:', error);
+                        res.status(500).send('Database insert error');
+                        return;
+                    }
+                    console.log('User inserted into MySQL with id:', results.insertId);
+                });
+            } else {
+                // Uporabnik že obstaja, posodobi podatke
+                connection.query('UPDATE users SET email = ?, name = ? WHERE google_id = ?', [email, name, userId], (error, results) => {
+                    if (error) {
+                        console.error('Error updating MySQL:', error);
+                        res.status(500).send('Database update error');
+                        return;
+                    }
+                    console.log('User updated in MySQL with id:', results.insertId);
+                });
+            }
+
+            // Nadaljujte z vašo aplikacijo
+            res.redirect(`http://localhost:5173/login-success?token=${tokens.access_token}`);
+        });
+    } catch (error) {
+        console.error('Authentication error:', error);
+        res.status(500).send('Authentication failed');
+    }
 }
 
 exports.logoutGoogle = (req, res) => {
