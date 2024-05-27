@@ -30,6 +30,17 @@ exports.redirectGoogle = async (req, res) => {
     res.redirect(`http://localhost:5173/login-success?token=${tokens.access_token}`);
 }
 
+exports.logoutGoogle = (req, res) => {
+    // Počistite sejo ali kredenciale
+    req.session = null;  // Če uporabljate seje za shranjevanje stanja uporabnika
+    outh2Client.revokeCredentials((err, body) => {
+        if (err) {
+            return res.status(500).send('Failed to revoke credentials');
+        }
+        res.redirect('http://localhost:5173/logout-success');
+    });
+}
+
 exports.dodajDogodek = async (req, res) => {
     calendar.events.insert({
         calendarId: 'primary',
