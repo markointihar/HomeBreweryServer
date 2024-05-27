@@ -51,16 +51,6 @@ io.on('connection', socket => {
   })
 })
 
-app.get('/test-db-connection', (req, res) => {
-    connection.query('SELECT 1', (err, results, fields) => {
-      if (err) {
-        console.error('Napaka pri izvajanju poizvedbe:', err);
-        res.status(500).send('Napaka pri povezovanju z bazo');
-        return;
-      }
-      res.send('Povezava z bazo je uspešna!');
-    });
-  });
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

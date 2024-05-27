@@ -27,7 +27,7 @@ exports.redirectGoogle = async (req, res) => {
     const { tokens } = await outh2Client.getToken(req.query.code);
     outh2Client.setCredentials(tokens);
 
-    res.send('Google login successful');
+    res.redirect(`http://localhost:5173/login-success?token=${tokens.access_token}`);
 }
 
 exports.dodajDogodek = async (req, res) => {
