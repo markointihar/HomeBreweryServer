@@ -73,8 +73,7 @@ exports.redirectGoogle = async (req, res) => {
                 });
             }
 
-            // Nadaljujte z vašo aplikacijo
-            res.redirect(`http://localhost:5173/login-success?token=${tokens.access_token}`);
+            res.redirect(`http://localhost:5173/login-success?email=${encodeURIComponent(userId)}&token=${tokens.access_token}`);
         });
     } catch (error) {
         console.error('Authentication error:', error);
@@ -93,21 +92,134 @@ exports.logoutGoogle = (req, res) => {
     });
 }
 
+exports.shraniRecept = async (req, res) => {
+    const {
+        naziv,
+        voda_litrov,
+        slad_kg,
+        hmelj_g,
+        cas_dodajanja_hmelja_min,
+        skupni_cas_kuhanja_min,
+        temperatura_hlajenja_c,
+        kvas_paketov,
+        temperatura_fermentacije_c,
+        cas_fermentacije_dni,
+        priming_sladkor_g,
+        cas_karbonizacije_dni,
+        cas_zorenja_dni,
+        user_id
+    } = req.body;
+    
+    const query = `
+        INSERT INTO recept (
+            naziv, voda_litrov, slad_kg, hmelj_g, cas_dodajanja_hmelja_min, 
+            skupni_cas_kuhanja_min, temperatura_hlajenja_c, kvas_paketov, 
+            temperatura_fermentacije_c, cas_fermentacije_dni, priming_sladkor_g, 
+            cas_karbonizacije_dni, cas_zorenja_dni, uporabnik_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+    
+    const values = [
+        naziv,
+        voda_litrov,
+        slad_kg,
+        hmelj_g,
+        cas_dodajanja_hmelja_min,
+        skupni_cas_kuhanja_min,
+        temperatura_hlajenja_c,
+        kvas_paketov,
+        temperatura_fermentacije_c,
+        cas_fermentacije_dni,
+        priming_sladkor_g,
+        cas_karbonizacije_dni,
+        cas_zorenja_dni,
+        user_id
+    ];
+    
+    connection.query(query, values, (err, results) => {
+        if (err) {
+            console.error('Napaka pri vstavljanju podatkov:', err);
+            res.status(500).json({ error: 'Napaka pri shranjevanju recepta' });
+            return;
+        }
+        res.status(201).json({ message: 'Recept uspešno shranjen', id: results.insertId });
+    });
+}
+
 exports.dodajDogodek = async (req, res) => {
+    konecFermentacije = parseInt(req.query.cas_fermentacije_dni);
+    konecKarbonizacije = konecFermentacije + parseInt(req.query.cas_karbonizacije_dni);
+    konecZorjenja = konecKarbonizacije + parseInt(req.query.cas_zorenja_dni);
+    console.log('Konec fermentacije:', konecFermentacije);
+    console.log('Konec karbonizacije:', konecKarbonizacije);
+    console.log('Konec zorjenja:', konecZorjenja);
     calendar.events.insert({
         calendarId: 'primary',
         requestBody: {
-            summary: 'Test dogodek',
-            start: { dateTime: dayjs().add(1, 'day').format()},
-            end: { dateTime: dayjs().add(1, 'day').add(1, 'hour').format()},
+            summary: 'Konec fermentacije',
+            start: { dateTime: dayjs().add(konecFermentacije, 'day').format()},
+            end: { dateTime: dayjs().add(konecFermentacije, 'day').add(1, 'hour').format()},
             timeZone: 'Europe/Ljubljana'
         }
     }, (err, result) => {
         if (err) {
-            console.error('Napaka pri dodajanju dogodka:', err);
-            res.status(500).send('Napaka pri dodajanju dogodka');
+            console.error('Napaka pri dodajanju dogodka konec fermentacije:', err);
+            res.status(500).send('Napaka pri dodajanju dogodka konec fermentacije');
             return;
         }
-        res.send('Dogodek uspešno dodan');
+    });
+    calendar.events.insert({
+        calendarId: 'primary',
+        requestBody: {
+            summary: 'Konec karbonizacije',
+            start: { dateTime: dayjs().add(konecKarbonizacije, 'day').format()},
+            end: { dateTime: dayjs().add(konecKarbonizacije, 'day').add(1, 'hour').format()},
+            timeZone: 'Europe/Ljubljana'
+        }
+    }, (err, result) => {
+        if (err) {
+            console.error('Napaka pri dodajanju dogodka konec karbonizacije:', err);
+            res.status(500).send('Napaka pri dodajanju dogodka konec karbonizacije');
+            return;
+        }
+    });
+    calendar.events.insert({
+        calendarId: 'primary',
+        requestBody: {
+            summary: 'Konec zorjenja',
+            start: { dateTime: dayjs().add(konecZorjenja, 'day').format()},
+            end: { dateTime: dayjs().add(konecZorjenja, 'day').add(1, 'hour').format()},
+            timeZone: 'Europe/Ljubljana'
+        }
+    }, (err, result) => {
+        if (err) {
+            console.error('Napaka pri dodajanju dogodka konec zorjenja:', err);
+            res.status(500).send('Napaka pri dodajanju dogodka konec zorjenja');
+            return;
+        }
+    });
+    res.send('Dogodki dodani v koledar');
+}
+
+exports.getUserId = (req, res) => {
+    const { google_id } = req.query;
+
+    // Izvedi poizvedbo v bazo za pridobitev uporabnikovega ID-ja glede na Google ID
+    const query = "SELECT id FROM users WHERE google_id = ?";
+
+    connection.query(query, [google_id], (error, results) => {
+        if (error) {
+            console.error('Napaka pri izvajanju poizvedbe:', error);
+            return res.status(500).json({ error: 'Napaka pri pridobivanju uporabnikovega ID-ja' });
+        }
+
+        // Preveri, ali je bil uporabnik najden
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'Uporabnik ni bil najden' });
+        }
+
+        // Vrne uporabnikov ID kot odgovor
+        const userId = results[0].id;
+        res.json({ id: userId });
     });
 }
