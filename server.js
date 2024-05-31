@@ -7,6 +7,8 @@ const sendEmail = require('./services/emailService');
 const connection = require('./config/db');
 const dataRoutes = require('./routes/izdelekRoute');
 const googleRoutes = require('./routes/googleRoute');
+const postRoutes = require('./routes/postRoute')
+const commentRoutes = require('./routes/commentRoute'); 
 
 const app = express();
 const server = http.createServer(app);
@@ -23,6 +25,8 @@ app.use(cors());  // Omogočanje CORS za vse zahteve
 app.use(express.json()); // Za parsiranje JSON telesa zahtevkov
 app.use('/api', dataRoutes);
 app.use('/', googleRoutes);
+app.use('/api', postRoutes); 
+app.use('/api', commentRoutes); 
 
 app.get('/', (req, res) => {
     res.send('Server is running');
