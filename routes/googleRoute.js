@@ -9,5 +9,7 @@ router.get('/dodaj-dogodek', googleController.dodajDogodek);
 router.post('/shrani-recept', googleController.shraniRecept);
 router.get('/get-user-id', googleController.getUserId);
 router.get('/logout', googleController.logoutGoogle);
+router.get('/get-user', googleController.getUser);
+router.get('/moji-recepti', googleController.getMojiRecepti);
 
 module.exports = router;

@@ -42,6 +42,7 @@ exports.redirectGoogle = async (req, res) => {
         const userId = payload['sub'];
         const email = payload['email'];
         const name = payload['name'];
+        const profilePicture = payload['picture']; // Pridobi URL profilne slike
 
         // Preverite, ali uporabnik že obstaja v bazi
         connection.query('SELECT * FROM users WHERE google_id = ?', [userId], (error, results) => {
@@ -53,7 +54,7 @@ exports.redirectGoogle = async (req, res) => {
 
             if (results.length === 0) {
                 // Uporabnik ne obstaja, vstavi novega uporabnika
-                connection.query('INSERT INTO users (google_id, email, name) VALUES (?, ?, ?)', [userId, email, name], (error, results) => {
+                connection.query('INSERT INTO users (google_id, email, name, profile_picture) VALUES (?, ?, ?, ?)', [userId, email, name, profilePicture], (error, results) => {
                     if (error) {
                         console.error('Error inserting into MySQL:', error);
                         res.status(500).send('Database insert error');
@@ -63,7 +64,7 @@ exports.redirectGoogle = async (req, res) => {
                 });
             } else {
                 // Uporabnik že obstaja, posodobi podatke
-                connection.query('UPDATE users SET email = ?, name = ? WHERE google_id = ?', [email, name, userId], (error, results) => {
+                connection.query('UPDATE users SET email = ?, name = ?, profile_picture = ? WHERE google_id = ?', [email, name, profilePicture, userId], (error, results) => {
                     if (error) {
                         console.error('Error updating MySQL:', error);
                         res.status(500).send('Database update error');
@@ -88,7 +89,7 @@ exports.logoutGoogle = (req, res) => {
         if (err) {
             return res.status(500).send('Failed to revoke credentials');
         }
-        res.redirect('http://localhost:5173/logout-success');
+        res.redirect('http://localhost:5173');
     });
 }
 
@@ -221,5 +222,56 @@ exports.getUserId = (req, res) => {
         // Vrne uporabnikov ID kot odgovor
         const userId = results[0].id;
         res.json({ id: userId });
+    });
+}
+exports.getUser = (req, res) => {
+    const { google_id } = req.query;
+
+    // Izvedi poizvedbo v bazo za pridobitev uporabnikovega ID-ja glede na Google ID
+    const query = "SELECT profile_picture, name, email FROM users WHERE google_id = ?";
+
+    connection.query(query, [google_id], (error, results) => {
+        if (error) {
+            console.error('Napaka pri izvajanju poizvedbe:', error);
+            return res.status(500).json({ error: 'Napaka pri pridobivanju uporabnikovih podatkov' });
+        }
+
+        // Preveri, ali je bil uporabnik najden
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'Uporabnik ni bil najden' });
+        }
+
+        // Vrne uporabnikove podatke kot odgovor
+        const user = results[0];
+        res.json(user);
+    });
+}
+
+exports.getMojiRecepti = (req, res) => {
+    const googleId = req.query.google_id;
+
+    connection.query('SELECT id FROM users WHERE google_id = ?', [googleId], (error, results) => {
+        if (error) {
+            console.error('Error querying MySQL:', error);
+            res.status(500).send('Database query error');
+            return;
+        }
+
+        if (results.length === 0) {
+            res.status(404).send('User not found');
+        } else {
+            const userId = results[0].id;
+
+            // Pridobite vse recepte uporabnika
+            connection.query('SELECT * FROM recept WHERE uporabnik_id = ?', [userId], (error, results) => {
+                if (error) {
+                    console.error('Error querying MySQL:', error);
+                    res.status(500).send('Database query error');
+                    return;
+                }
+
+                res.json(results);
+            });
+        }
     });
 }
