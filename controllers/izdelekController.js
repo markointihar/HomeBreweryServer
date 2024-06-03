@@ -2,13 +2,14 @@
 
 //povezava na db
 const db = require('../config/db');
-
+const path = require('path');
+const multer = require('multer');
 //pridboivanje podatkov z queryiji iz pod. baze
 // export. => to kar se tu pridobi se izvozi v router, ki potem posta/geta podatke 
 exports.getAllData = (req, res) => {
   
   //definicija querij-ev za pridobivaneje izdelkov in kategorij
-  const sqlIzdelki = 'SELECT izdelek.id, izdelek.naziv, izdelek.cena, izdelek.opis, kategorija.ime as ime_kategorije, kategorija.id as kategorija_id FROM izdelek JOIN kategorija ON izdelek.kategorija_id = kategorija.id;';
+  const sqlIzdelki = 'SELECT izdelek.id, izdelek.naziv, izdelek.cena, izdelek.opis, izdelek.zaloga, kategorija.ime as ime_kategorije, kategorija.id as kategorija_id FROM izdelek JOIN kategorija ON izdelek.kategorija_id = kategorija.id;';
   const sqlKategorije = 'SELECT * FROM kategorija';
   
   //izvanaje querijev in prvo pridobivanje izdelkov 
@@ -34,7 +35,7 @@ exports.getAllData = (req, res) => {
 
 exports.getIzdelekById = (req, res) => {
   const id = req.params.id;
-  const sql = `SELECT * FROM izdelek WHERE izdelek.id = ${id  }`;
+  const sql = `SELECT * FROM izdelek WHERE izdelek.id = ${id}`;
 
   db.query(sql, [id], (err, result) => {
     if (err) {
@@ -69,14 +70,34 @@ exports.getKategorije = (req ,res)=>{
 } 
 
 
-exports.addIzdelek = (req, res) => {
-  const { naziv, cena, opis, kategorija_id } = req.body;
-  const sql = 'INSERT INTO izdelek (naziv, cena, opis, kategorija_id) VALUES (?, ?, ?, ?)';
-  
-  db.query(sql, [naziv, cena, opis, kategorija_id], (err, results) => {
+exports.purchaseIzdelek = (req, res) => {
+  const { id } = req.body;
+  const sql = `UPDATE izdelek SET zaloga = zaloga - 1 WHERE id = ${id} AND zaloga > 0`;
+
+  db.query(sql, [id], (err, result) => {
     if (err) {
       return res.status(500).send(err);
     }
-    res.status(201).send('Izdelek uspešno dodan!');
+
+    if (result.affectedRows === 0) {
+      return res.status(400).send('Izdelka ni na zalogi');
+    }
+
+    res.send('Nakup uspešno potrjen');
   });
 };
+
+
+exports.createIzdelek = (req, res) => {
+  const { naziv, cena, opis, zaloga, kategorija_id } = req.body;
+  const slika = req.file ? req.file.path : null;
+  const sql = 'INSERT INTO izdelek (naziv, cena, opis, zaloga, slika, kategorija_id) VALUES (?, ?, ?, ?, ?, ?)';
+
+  db.query(sql, [naziv, cena, opis, zaloga, slika, kategorija_id], (err, result) => {
+    if (err) {
+      return res.status(500).send(err);
+    }
+    res.send('Izdelek uspešno dodan');
+  });
+};
+
