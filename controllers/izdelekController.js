@@ -88,7 +88,25 @@ exports.purchaseIzdelek = (req, res) => {
 };
 
 
+// Setup multer for file upload
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '../uploads/'));
+  },
+  
+  filename: function (req, file, cb) {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  }
+});
+
+const upload = multer({ storage: storage }).single('slika');
+
 exports.createIzdelek = (req, res) => {
+  upload(req, res, function (err) {
+    if (err) {
+      return res.status(500).send(err);
+    }
+ 
   const { naziv, cena, opis, zaloga, kategorija_id } = req.body;
   const slika = req.file ? req.file.path : null;
   const sql = 'INSERT INTO izdelek (naziv, cena, opis, zaloga, slika, kategorija_id) VALUES (?, ?, ?, ?, ?, ?)';
@@ -97,7 +115,9 @@ exports.createIzdelek = (req, res) => {
     if (err) {
       return res.status(500).send(err);
     }
+    console.log('Pravkar dodan izdelek:', { id: result.insertId, naziv, cena, opis, zaloga, slika, kategorija_id });
     res.send('Izdelek uspešno dodan');
   });
+});
 };
 
