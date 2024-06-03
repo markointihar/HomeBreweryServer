@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
+const path = require('path');
 const { v4: uuidv4 } = require('uuid');  // Uvoz uuid knjižnice
 const sendEmail = require('./services/emailService');
 const connection = require('./config/db');
@@ -23,6 +24,7 @@ const io = new Server(server, {
 
 app.use(cors());  // Omogočanje CORS za vse zahteve
 app.use(express.json()); // Za parsiranje JSON telesa zahtevkov
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api', dataRoutes);
 app.use('/', googleRoutes);
 app.use('/api', postRoutes); 

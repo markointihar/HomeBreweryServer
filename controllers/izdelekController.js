@@ -6,10 +6,26 @@ const path = require('path');
 const multer = require('multer');
 //pridboivanje podatkov z queryiji iz pod. baze
 // export. => to kar se tu pridobi se izvozi v router, ki potem posta/geta podatke 
+
+// Setup multer for file upload
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '../uploads/'));
+  },
+  
+  filename: function (req, file, cb) {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  }
+});
+
+const upload = multer({ storage: storage }).single('slika');
+
+
+
 exports.getAllData = (req, res) => {
   
   //definicija querij-ev za pridobivaneje izdelkov in kategorij
-  const sqlIzdelki = 'SELECT izdelek.id, izdelek.naziv, izdelek.cena, izdelek.opis, izdelek.zaloga, kategorija.ime as ime_kategorije, kategorija.id as kategorija_id FROM izdelek JOIN kategorija ON izdelek.kategorija_id = kategorija.id;';
+  const sqlIzdelki = 'SELECT izdelek.id, izdelek.naziv, izdelek.cena, izdelek.opis, izdelek.zaloga, izdelek.slika, kategorija.ime as ime_kategorije, kategorija.id as kategorija_id FROM izdelek JOIN kategorija ON izdelek.kategorija_id = kategorija.id;';
   const sqlKategorije = 'SELECT * FROM kategorija';
   
   //izvanaje querijev in prvo pridobivanje izdelkov 
@@ -87,19 +103,6 @@ exports.purchaseIzdelek = (req, res) => {
   });
 };
 
-
-// Setup multer for file upload
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../uploads/'));
-  },
-  
-  filename: function (req, file, cb) {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  }
-});
-
-const upload = multer({ storage: storage }).single('slika');
 
 exports.createIzdelek = (req, res) => {
   upload(req, res, function (err) {
