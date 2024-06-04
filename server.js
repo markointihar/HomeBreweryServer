@@ -24,7 +24,11 @@ const io = new Server(server, {
 
 app.use(cors());  // Omogočanje CORS za vse zahteve
 app.use(express.json()); // Za parsiranje JSON telesa zahtevkov
+
+// Serve static files from the uploads directory
+//app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.use('/api', dataRoutes);
 app.use('/', googleRoutes);
 app.use('/api', postRoutes); 

@@ -1,4 +1,4 @@
-// controllers/dataController.js
+// controllers/izdelekController.js
 
 //povezava na db
 const db = require('../config/db');
@@ -12,7 +12,6 @@ const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, path.join(__dirname, '../uploads/'));
   },
-  
   filename: function (req, file, cb) {
     cb(null, `${Date.now()}-${file.originalname}`);
   }
@@ -20,12 +19,30 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage }).single('slika');
 
+exports.createIzdelek = (req, res) => {
+  upload(req, res, function (err) {
+    if (err) {
+      return res.status(500).send(err);
+    }
 
+  const { naziv, cena, opis, zaloga, kategorija_id } = req.body;
+  const slika = req.file ? req.file.filename : null;
+  const sql = 'INSERT INTO izdelek (naziv, cena, opis, zaloga, slika, kategorija_id) VALUES (?, ?, ?, ?, ?, ?)';
+
+  db.query(sql, [naziv, cena, opis, zaloga, slika, kategorija_id], (err, result) => {
+    if (err) {
+      return res.status(500).send(err);
+    }
+    console.log('Pravkar dodan izdelek:', { id: result.insertId, naziv, cena, opis, zaloga, slika, kategorija_id });
+    res.send('Izdelek uspešno dodan');
+  });
+});
+};
 
 exports.getAllData = (req, res) => {
   
   //definicija querij-ev za pridobivaneje izdelkov in kategorij
-  const sqlIzdelki = 'SELECT izdelek.id, izdelek.naziv, izdelek.cena, izdelek.opis, izdelek.zaloga, izdelek.slika, kategorija.ime as ime_kategorije, kategorija.id as kategorija_id FROM izdelek JOIN kategorija ON izdelek.kategorija_id = kategorija.id;';
+  const sqlIzdelki = 'SELECT * FROM izdelek';
   const sqlKategorije = 'SELECT * FROM kategorija';
   
   //izvanaje querijev in prvo pridobivanje izdelkov 
@@ -35,10 +52,10 @@ exports.getAllData = (req, res) => {
     }
 
     //pridobivanje kategorije
-    db.query(sqlKategorije, (err, resultsKategorije) => {
-      if (err) {
-        return res.status(500).send(err);
-      }
+  db.query(sqlKategorije, (err, resultsKategorije) => {
+    if (err) {
+      return res.status(500).send(err);
+    }
 
       // razbiranje kategorij in izdelkov
       res.json({
@@ -48,24 +65,6 @@ exports.getAllData = (req, res) => {
     });
   });
 };
-
-exports.getIzdelekById = (req, res) => {
-  const id = req.params.id;
-  const sql = `SELECT * FROM izdelek WHERE izdelek.id = ${id}`;
-
-  db.query(sql, [id], (err, result) => {
-    if (err) {
-      return res.status(500).send(err);
-    }
-
-    if (result.length === 0) {
-      return res.status(404).send('Izdelek ne obstaja');
-    }
-
-    res.json(result[0]);
-  });
-};
-
 
 
 exports.getKategorije = (req ,res)=>{
@@ -86,6 +85,24 @@ exports.getKategorije = (req ,res)=>{
 } 
 
 
+exports.getIzdelekById = (req, res) => {
+  const id = req.params.id;
+  const sql = `SELECT * FROM izdelek WHERE izdelek.id = ${id}`;
+
+  db.query(sql, [id], (err, result) => {
+    if (err) {
+      return res.status(500).send(err);
+    }
+
+    if (result.length === 0) {
+      return res.status(404).send('Izdelek ne obstaja');
+    }
+
+    res.json(result[0]);
+  });
+};
+
+
 exports.purchaseIzdelek = (req, res) => {
   const { id } = req.body;
   const sql = `UPDATE izdelek SET zaloga = zaloga - 1 WHERE id = ${id} AND zaloga > 0`;
@@ -101,26 +118,4 @@ exports.purchaseIzdelek = (req, res) => {
 
     res.send('Nakup uspešno potrjen');
   });
-};
-
-
-exports.createIzdelek = (req, res) => {
-  upload(req, res, function (err) {
-    if (err) {
-      return res.status(500).send(err);
-    }
- 
-  const { naziv, cena, opis, zaloga, kategorija_id } = req.body;
-  const slika = req.file ? req.file.path : null;
-  const sql = 'INSERT INTO izdelek (naziv, cena, opis, zaloga, slika, kategorija_id) VALUES (?, ?, ?, ?, ?, ?)';
-
-  db.query(sql, [naziv, cena, opis, zaloga, slika, kategorija_id], (err, result) => {
-    if (err) {
-      return res.status(500).send(err);
-    }
-    console.log('Pravkar dodan izdelek:', { id: result.insertId, naziv, cena, opis, zaloga, slika, kategorija_id });
-    res.send('Izdelek uspešno dodan');
-  });
-});
-};
-
+}
