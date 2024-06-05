@@ -3,10 +3,10 @@
 const db = require('../config/db');
 
 exports.createPost = (req, res) => {
-    const { title, content } = req.body;
-    const sql = 'INSERT INTO posts (title, content) VALUES (?, ?)';
+    const { title, content,user_id } = req.body;
+    const sql = 'INSERT INTO posts (title, content, user_id) VALUES (?, ?, ?)';
 
-    db.query(sql, [title, content], (err, result) => {
+    db.query(sql, [title, content, user_id], (err, result) => {
         if (err) {
             return res.status(500).send(err);
         }
@@ -53,7 +53,14 @@ exports.downvotePost = (req, res) => {
 
 exports.getPostById = (req, res) => {
     const postId = req.params.postId;
-    const sql = 'SELECT * FROM posts WHERE id = ?';
+    const sql = `
+    SELECT posts.*, users.name 
+    FROM posts 
+    INNER JOIN users ON posts.user_id = users.id 
+    WHERE posts.id = ?
+  `;
+  
+    
 
     db.query(sql, [postId], (err, result) => {
         if (err) {
