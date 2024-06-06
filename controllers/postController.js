@@ -74,9 +74,16 @@ exports.getPostById = (req, res) => {
 
 };
 
+// controllers/postController.js
+
 exports.getPostComments = (req, res) => {
     const postId = req.params.postId;
-    const sql = 'SELECT * FROM comments WHERE postId = ?';
+    const sql = `
+        SELECT comments.*, users.name, users.profile_picture
+        FROM comments
+        INNER JOIN users ON comments.user_id = users.id
+        WHERE comments.postId = ?
+    `;
 
     db.query(sql, [postId], (err, results) => {
         if (err) {
@@ -85,3 +92,4 @@ exports.getPostComments = (req, res) => {
         res.json(results);
     });
 };
+
