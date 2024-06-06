@@ -76,7 +76,7 @@ exports.getPostById = (req, res) => {
 
 exports.getPostComments = (req, res) => {
     const postId = req.params.postId;
-    const sql = 'SELECT * FROM comments WHERE postId = ?';
+    const sql = 'SELECT u.name,  u.profile_picture, c.* FROM comments c JOIN users u ON c.user_id = u.id WHERE postId = ?';
 
     db.query(sql, [postId], (err, results) => {
         if (err) {
