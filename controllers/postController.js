@@ -93,3 +93,45 @@ exports.getPostComments = (req, res) => {
     });
 };
 
+// postController.js
+
+exports.likePost = (req, res) => {
+    const { postId } = req.params;
+    const { user_id } = req.body; // Assuming user ID is sent in the request body
+
+    const sql = 'INSERT INTO likes (post_id, user_id) VALUES (?, ?)';
+    db.query(sql, [postId, user_id], (err, result) => {
+        if (err) {
+            return res.status(500).send(err);
+        }
+        res.status(200).send('Post liked successfully.');
+    });
+};
+
+exports.unlikePost = (req, res) => {
+    const { postId } = req.params;
+    const { user_id } = req.body; // Assuming user ID is sent in the request body
+
+    const sql = 'DELETE FROM likes WHERE post_id = ? AND user_id = ?';
+    db.query(sql, [postId, user_id], (err, result) => {
+        if (err) {
+            return res.status(500).send(err);
+        }
+        res.status(200).send('Post unliked successfully.');
+    });
+};
+
+
+// controllers/postController.js
+
+exports.searchPosts = (req, res) => {
+    const { query } = req.query;
+    const sql = 'SELECT * FROM posts WHERE title LIKE ? OR content LIKE ? ORDER BY created_at DESC';
+
+    db.query(sql, [`%${query}%`, `%${query}%`], (err, results) => {
+        if (err) {
+            return res.status(500).send(err);
+        }
+        res.json(results);
+    });
+};

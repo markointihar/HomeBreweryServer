@@ -14,4 +14,12 @@ router.get('/posts/:postId/comments', postController.getPostComments);
 router.post('/posts/:postId/comments', commentController.addComment);
 
 
+router.get('/search', postController.searchPosts);
+
+
+router.post('/posts/:postId/like', postController.likePost);
+router.post('/posts/:postId/unlike', postController.unlikePost);
+
+
+
 module.exports = router;
