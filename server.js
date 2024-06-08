@@ -8,8 +8,8 @@ const sendEmail = require('./services/emailService');
 const connection = require('./config/db');
 const dataRoutes = require('./routes/izdelekRoute');
 const googleRoutes = require('./routes/googleRoute');
-const postRoutes = require('./routes/postRoute')
-const commentRoutes = require('./routes/commentRoute'); 
+const postRoutes = require('./routes/postRoute');
+const commentRoutes = require('./routes/commentRoute');
 
 const app = express();
 const server = http.createServer(app);
@@ -20,26 +20,16 @@ const io = new Server(server, {
     }
 });
 
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://home-brewery.vercel.app');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  next();
-});
-
-
 app.use(cors());  // Omogočanje CORS za vse zahteve
 app.use(express.json()); // Za parsiranje JSON telesa zahtevkov
 
 // Serve static files from the uploads directory
-//app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/api', dataRoutes);
 app.use('/', googleRoutes);
-app.use('/api', postRoutes); 
-app.use('/api', commentRoutes); 
+app.use('/api', postRoutes);
+app.use('/api', commentRoutes);
 
 app.get('/', (req, res) => {
     res.send('Server is running');
@@ -68,9 +58,7 @@ io.on('connection', socket => {
   })
 })
 
-
 const PORT = process.env.PORT || 3002;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-module.exports = app;
-module.exports = io;
+module.exports =  app, io;
