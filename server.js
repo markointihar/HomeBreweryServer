@@ -42,7 +42,7 @@ app.get('/', (req, res) => {
 app.get('/create-room', (req, res) => {
     const roomId = uuidv4();  // Generiraj unikatni ID za sobo
     res.send({ roomId, link: `https://home-brewery.vercel.app/room/${roomId}` });
-    //sendEmail(`http://https://home-brewery.vercel.app/room/${roomId}`)
+    sendEmail(`http://https://home-brewery.vercel.app/room/${roomId}`)
 });
 
 const users = {}
