@@ -74,7 +74,7 @@ exports.redirectGoogle = async (req, res) => {
                 });
             }
 
-            res.redirect(`http://localhost:5173/login-success?email=${encodeURIComponent(userId)}&token=${tokens.access_token}`);
+            res.redirect(`https://home-brewery.vercel.app/login-success?email=${encodeURIComponent(userId)}&token=${tokens.access_token}`);
         });
     } catch (error) {
         console.error('Authentication error:', error);
@@ -89,7 +89,7 @@ exports.logoutGoogle = (req, res) => {
         if (err) {
             return res.status(500).send('Failed to revoke credentials');
         }
-        res.redirect('http://localhost:5173');
+        res.redirect('https://home-brewery.vercel.app');
     });
 }
 
