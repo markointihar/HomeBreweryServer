@@ -65,6 +65,4 @@ io.on('connection', socket => {
 const PORT = process.env.PORT || 3002;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-module.exports = (req, res) => {
-  return app(req, res);
-};
+module.exports =  { app, io };
