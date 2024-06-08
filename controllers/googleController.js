@@ -74,7 +74,7 @@ exports.redirectGoogle = async (req, res) => {
                 });
             }
 
-            res.redirect(`https://home-brewery-server.vercel.app/login-success?email=${encodeURIComponent(userId)}&token=${tokens.access_token}`);
+            res.redirect(`https://home-brewery.vercel.app/login-success?email=${encodeURIComponent(userId)}&token=${tokens.access_token}`);
         });
     } catch (error) {
         console.error('Authentication error:', error);
