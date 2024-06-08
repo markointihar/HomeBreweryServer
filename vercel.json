@@ -6,8 +6,6 @@
         } 
     ],
     "rewrites": [
-        { 
-            "source": "server.js", "destination": "server.js" 
-        }
-    ] 
+        {"source": "/(.*)", "destination": "/"}
+    ]
 }
