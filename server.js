@@ -15,7 +15,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173",
+        origin: "https://home-brewery.vercel.app",
         methods: ["GET", "POST"]
     }
 });
@@ -41,8 +41,8 @@ app.get('/', (req, res) => {
 // Dodaj novo pot za generiranje ID-ja sobe in vračanje povezave do sobe
 app.get('/create-room', (req, res) => {
     const roomId = uuidv4();  // Generiraj unikatni ID za sobo
-    res.send({ roomId, link: `http://localhost:5173/room/${roomId}` });
-    //sendEmail(`http://localhost:5173/room/${roomId}`)
+    res.send({ roomId, link: `https://home-brewery.vercel.app/room/${roomId}` });
+    //sendEmail(`http://https://home-brewery.vercel.app/room/${roomId}`)
 });
 
 const users = {}
@@ -62,5 +62,5 @@ io.on('connection', socket => {
 })
 
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
