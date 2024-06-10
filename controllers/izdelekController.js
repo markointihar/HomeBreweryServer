@@ -40,7 +40,7 @@ exports.createIzdelek = (req, res) => {
 }; */
 
 
-const db = require('../config/db');
+
 
 exports.createIzdelek = (req, res) => {
   const { naziv, cena, opis, zaloga, slika, kategorija_id } = req.body;
