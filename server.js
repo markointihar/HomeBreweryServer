@@ -21,7 +21,12 @@ const io = new Server(server, {
     }
 });
 */
-app.use(cors());  // Omogočanje CORS za vse zahteve
+app.use(cors(
+    {
+        origin: "https://home-brewery.vercel.app",
+        methods: ["GET", "POST"]
+    }
+));  // Omogočanje CORS za vse zahteve
 app.use(express.json()); // Za parsiranje JSON telesa zahtevkov
 
 // Serve static files from the uploads directory
