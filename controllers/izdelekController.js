@@ -44,7 +44,10 @@ exports.createIzdelek = (req, res) => {
 
 exports.createIzdelek = (req, res) => {
   const { naziv, cena, opis, zaloga, slika, kategorija_id } = req.body;
+  console.log('sent data:', req.body)
   const sql = 'INSERT INTO izdelek (naziv, cena, opis, zaloga, slika, kategorija_id) VALUES (?, ?, ?, ?, ?, ?)';
+
+  const querry = `INSERT INTO izdelek (${naziv}, cena, opis, zaloga, slika, kategorija_id) VALUES (?, ?, ?, ?, ?, ?)`;
 
   db.query(sql, [naziv, cena, opis, zaloga, slika, kategorija_id], (err, result) => {
     if (err) {
