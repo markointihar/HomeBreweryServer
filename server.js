@@ -13,20 +13,14 @@ const commentRoutes = require('./routes/commentRoute');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server, {
-  cors: {
-      origin: "https://home-brewery.vercel.app",
-      methods: ["GET", "POST"],
-      credentials: true
-  },
-  transports: ['websocket', 'polling']
+const io = new Server(server, {
+    cors: {
+        origin: "https://home-brewery.vercel.app",
+        methods: ["GET", "POST"]
+    }
 });
 
-app.use(cors({
-  origin: "https://home-brewery.vercel.app",
-  methods: ["GET", "POST"],
-  credentials: true
-}));
+app.use(cors());  // Omogočanje CORS za vse zahteve
 app.use(express.json()); // Za parsiranje JSON telesa zahtevkov
 
 // Serve static files from the uploads directory
