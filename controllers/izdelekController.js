@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage }).single('slika');
-
+/* 
 exports.createIzdelek = (req, res) => {
   upload(req, res, function (err) {
     if (err) {
@@ -37,7 +37,24 @@ exports.createIzdelek = (req, res) => {
     res.send('Izdelek uspešno dodan');
   });
 });
+}; */
+
+
+const db = require('../config/db');
+
+exports.createIzdelek = (req, res) => {
+  const { naziv, cena, opis, zaloga, slika, kategorija_id } = req.body;
+  const sql = 'INSERT INTO izdelek (naziv, cena, opis, zaloga, slika, kategorija_id) VALUES (?, ?, ?, ?, ?, ?)';
+
+  db.query(sql, [naziv, cena, opis, zaloga, slika, kategorija_id], (err, result) => {
+    if (err) {
+      return res.status(500).send(err);
+    }
+    console.log('Pravkar dodan izdelek:', { id: result.insertId, naziv, cena, opis, zaloga, slika, kategorija_id });
+    res.send('Izdelek uspešno dodan');
+  });
 };
+
 
 exports.getAllData = (req, res) => {
   

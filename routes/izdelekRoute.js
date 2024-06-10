@@ -1,4 +1,4 @@
-// routes/dataRoutes.js
+// routes/izdelekRoutes.js
 
 const express = require('express');
 const router = express.Router();
