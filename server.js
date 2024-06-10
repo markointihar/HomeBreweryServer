@@ -13,11 +13,13 @@ const commentRoutes = require('./routes/commentRoute');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
-    cors: {
-        origin: "https://home-brewery.vercel.app",
-        methods: ["GET", "POST"]
-    }
+const io = socketIo(server, {
+  cors: {
+      origin: "https://home-brewery.vercel.app",
+      methods: ["GET", "POST"],
+      credentials: true
+  },
+  transports: ['websocket', 'polling']
 });
 
 app.use(cors());  // Omogočanje CORS za vse zahteve
@@ -39,7 +41,7 @@ app.get('/', (req, res) => {
 app.get('/create-room', (req, res) => {
     const roomId = uuidv4();  // Generiraj unikatni ID za sobo
     res.send({ roomId, link: `https://home-brewery.vercel.app/room/${roomId}` });
-    sendEmail(`http://https://home-brewery.vercel.app/room/${roomId}`)
+    sendEmail(`https://home-brewery.vercel.app/room/${roomId}`)
 });
 
 const users = {}
