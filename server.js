@@ -22,7 +22,11 @@ const io = socketIo(server, {
   transports: ['websocket', 'polling']
 });
 
-app.use(cors());  // Omogočanje CORS za vse zahteve
+app.use(cors({
+  origin: "https://home-brewery.vercel.app",
+  methods: ["GET", "POST"],
+  credentials: true
+}));
 app.use(express.json()); // Za parsiranje JSON telesa zahtevkov
 
 // Serve static files from the uploads directory
