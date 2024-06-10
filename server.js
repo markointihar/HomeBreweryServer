@@ -24,7 +24,8 @@ const io = new Server(server, {
 app.use(cors(
     {
         origin: "https://home-brewery.vercel.app",
-        methods: ["GET", "POST"]
+        methods: ["GET", "POST"],
+        allowedHeaders: ["Content-Type", "Authorization"],
     }
 ));  // Omogočanje CORS za vse zahteve
 app.use(express.json()); // Za parsiranje JSON telesa zahtevkov
